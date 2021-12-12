@@ -1,3 +1,4 @@
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -fcoroutines")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++20 -stdlib=libc++") #enable if build with clang
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -std=c++20 -stdlib=libc++ -lc++abi") #enable if build with clang
 cmake_minimum_required(VERSION 3.17)
@@ -8,7 +9,7 @@ project(project VERSION 1.0.0
 cmake_policy(SET CMP0015 NEW)
 
 
-
+find_package(Boost 1.77.0 REQUIRED)
 
 ########## enable cache system
 include(cmake/Cache.cmake)
@@ -36,8 +37,8 @@ target_compile_features(${PROJECT_OPTIONS} INTERFACE cxx_std_20)
 #include(cmake/StaticAnalyzers.cmake) 
  
 ######## conan setup
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+#include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+#conan_basic_setup(TARGETS)
 
 
 set(TARGET_NAME project)
@@ -50,16 +51,18 @@ add_subdirectory(src)
 
 ####### link
 target_include_directories(${TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 target_include_directories(${TARGET_NAME} PRIVATE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
   
+link_directories(${Boost_LIBRARY_DIRS})
 
 target_link_libraries(${TARGET_NAME} PRIVATE
 ${PROJECT_WARNINGS}
 ${PROJECT_OPTIONS}
-CONAN_PKG::boost
+${Boost_LIBRARIES}
 )
 
 ####### create executable
